@@ -1,0 +1,459 @@
+<title>Синергия в отборе узлов</title>
+<style>
+  :root{
+    --bg:#eef0ea;
+    --surface:#fbfbf8;
+    --surface-2:#f2f3ee;
+    --ink:#1a1f1c;
+    --ink-mut:#565f57;
+    --ink-faint:#7c857d;
+    --border:rgba(26,31,28,0.13);
+    --border-strong:rgba(26,31,28,0.22);
+    --accent:#0e6b5c;
+    --accent-ink:#0e6b5c;
+    --accent-soft:rgba(14,107,92,0.10);
+    --bad:#a4471f;
+    --bad-soft:rgba(164,71,31,0.10);
+    --amber:#8a6a12;
+    --amber-soft:rgba(138,106,18,0.12);
+    --open:#3e4f72;
+    --open-soft:rgba(62,79,114,0.10);
+    --code-bg:#e7e9e1;
+    color-scheme: light;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --bg:#141713;
+      --surface:#1b1f1a;
+      --surface-2:#20241f;
+      --ink:#eceee7;
+      --ink-mut:#a7ad9f;
+      --ink-faint:#7d8477;
+      --border:rgba(236,238,231,0.14);
+      --border-strong:rgba(236,238,231,0.24);
+      --accent:#4fcbb0;
+      --accent-ink:#6fdcc3;
+      --accent-soft:rgba(79,203,176,0.13);
+      --bad:#e2916b;
+      --bad-soft:rgba(226,145,107,0.14);
+      --amber:#d9b65b;
+      --amber-soft:rgba(217,182,91,0.14);
+      --open:#93a6d6;
+      --open-soft:rgba(147,166,214,0.14);
+      --code-bg:#262b23;
+    }
+  }
+  :root[data-theme="dark"]{
+    --bg:#141713;
+    --surface:#1b1f1a;
+    --surface-2:#20241f;
+    --ink:#eceee7;
+    --ink-mut:#a7ad9f;
+    --ink-faint:#7d8477;
+    --border:rgba(236,238,231,0.14);
+    --border-strong:rgba(236,238,231,0.24);
+    --accent:#4fcbb0;
+    --accent-ink:#6fdcc3;
+    --accent-soft:rgba(79,203,176,0.13);
+    --bad:#e2916b;
+    --bad-soft:rgba(226,145,107,0.14);
+    --amber:#d9b65b;
+    --amber-soft:rgba(217,182,91,0.14);
+    --open:#93a6d6;
+    --open-soft:rgba(147,166,214,0.14);
+    --code-bg:#262b23;
+  }
+
+  * { box-sizing:border-box; }
+  body{
+    background:var(--bg);
+    color:var(--ink);
+    font-family:"Public Sans", -apple-system, BlinkMacSystemFont, sans-serif;
+    line-height:1.55;
+    font-size:15.5px;
+  }
+  .page{
+    max-width:860px;
+    margin:0 auto;
+    padding:48px 20px 80px;
+  }
+  h1,h2,h3{
+    font-family:"Source Serif 4", Georgia, serif;
+    font-weight:600;
+    letter-spacing:-0.01em;
+    text-wrap:balance;
+    color:var(--ink);
+  }
+  code, .mono{
+    font-family:"IBM Plex Mono", ui-monospace, monospace;
+  }
+  .file{
+    font-family:"IBM Plex Mono", ui-monospace, monospace;
+    background:var(--code-bg);
+    padding:0.06em 0.4em;
+    border-radius:4px;
+    font-size:0.86em;
+    white-space:nowrap;
+  }
+
+  /* ---------- header ---------- */
+  .masthead{
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+    padding-bottom:28px;
+    border-bottom:1px solid var(--border-strong);
+    margin-bottom:32px;
+  }
+  .eyebrow{
+    font-family:"IBM Plex Mono", monospace;
+    font-size:11.5px;
+    letter-spacing:0.09em;
+    text-transform:uppercase;
+    color:var(--ink-faint);
+  }
+  h1{ font-size:clamp(28px, 4.4vw, 38px); margin:0; line-height:1.12; }
+  .subtitle{ color:var(--ink-mut); font-size:16px; max-width:56ch; }
+  .sources{
+    display:flex; flex-wrap:wrap; gap:8px 18px;
+    font-size:13px; color:var(--ink-faint); margin-top:4px;
+  }
+  .sources span{ display:flex; align-items:center; gap:6px; }
+
+  /* ---------- summary callout ---------- */
+  .callout{
+    background:var(--surface);
+    border:1px solid var(--border);
+    border-left:3px solid var(--accent);
+    border-radius:10px;
+    padding:20px 22px;
+    margin-bottom:40px;
+  }
+  .callout .label{
+    font-family:"IBM Plex Mono", monospace;
+    font-size:11px; letter-spacing:0.08em; text-transform:uppercase;
+    color:var(--accent-ink); margin-bottom:8px; display:block;
+  }
+  .callout p{ margin:0; color:var(--ink); font-size:16px; }
+
+  /* ---------- sections ---------- */
+  .nb-section{ margin-bottom:52px; }
+  .nb-head{
+    display:flex; align-items:baseline; gap:12px; flex-wrap:wrap;
+    margin-bottom:6px;
+  }
+  .nb-num{
+    font-family:"IBM Plex Mono", monospace;
+    font-size:13px; color:var(--ink-faint);
+    border:1px solid var(--border-strong);
+    border-radius:999px;
+    padding:2px 10px;
+  }
+  .nb-head h2{ font-size:24px; margin:0; }
+  .nb-file{
+    font-size:13px; color:var(--ink-faint); margin-bottom:20px;
+  }
+
+  /* ---------- thesis item ---------- */
+  .thesis{
+    display:grid;
+    grid-template-columns:118px 1fr;
+    gap:16px;
+    padding:16px 0;
+    border-top:1px solid var(--border);
+  }
+  .thesis:last-child{ border-bottom:1px solid var(--border); }
+  .tag{
+    font-family:"IBM Plex Mono", monospace;
+    font-size:10.5px;
+    letter-spacing:0.03em;
+    line-height:1.3;
+    padding:4px 8px;
+    border-radius:6px;
+    height:fit-content;
+    text-align:center;
+  }
+  .tag.confirmed{ background:var(--accent-soft); color:var(--accent-ink); }
+  .tag.rejected{ background:var(--bad-soft); color:var(--bad); }
+  .tag.caveat{ background:var(--amber-soft); color:var(--amber); }
+  .tag.open{ background:var(--open-soft); color:var(--open); }
+  .thesis-body b{ font-weight:650; }
+  .thesis-body p{ margin:0; color:var(--ink); }
+  .thesis-body .ref{ color:var(--ink-faint); font-size:12.5px; }
+
+  @media (max-width:560px){
+    .thesis{ grid-template-columns:1fr; gap:8px; }
+    .tag{ width:fit-content; }
+  }
+
+  /* ---------- necessity deep-dive ---------- */
+  .deepdive{
+    background:var(--surface);
+    border:1px solid var(--border-strong);
+    border-radius:14px;
+    padding:26px 26px 22px;
+    margin:26px 0 8px;
+  }
+  .deepdive h3{ font-size:19px; margin:0 0 4px; }
+  .deepdive .tag{ display:inline-block; margin-bottom:14px; }
+  .deepdive h4{
+    font-family:"Public Sans", sans-serif;
+    font-weight:650; font-size:13px;
+    text-transform:uppercase; letter-spacing:0.04em;
+    color:var(--ink-mut);
+    margin:22px 0 8px;
+  }
+  .deepdive p{ margin:0 0 10px; }
+  .protocol-steps{
+    display:flex; flex-direction:column; gap:10px;
+    margin:4px 0 4px;
+  }
+  .protocol-steps div{
+    display:grid; grid-template-columns:22px 1fr; gap:10px;
+    font-size:14.5px;
+  }
+  .protocol-steps .n{
+    font-family:"IBM Plex Mono", monospace;
+    color:var(--accent-ink); font-size:13px;
+  }
+
+  table{
+    width:100%;
+    border-collapse:collapse;
+    font-size:13.8px;
+    font-variant-numeric:tabular-nums;
+    margin:10px 0 6px;
+  }
+  caption{ caption-side:top; text-align:left; font-size:12.5px; color:var(--ink-faint); margin-bottom:6px; }
+  th, td{ padding:8px 10px; text-align:right; border-bottom:1px solid var(--border); }
+  th:first-child, td:first-child{ text-align:left; }
+  thead th{
+    font-family:"IBM Plex Mono", monospace;
+    font-weight:500; font-size:11px; text-transform:uppercase;
+    letter-spacing:0.03em; color:var(--ink-faint);
+    border-bottom:1px solid var(--border-strong);
+  }
+  tbody tr:last-child td{ border-bottom:1px solid var(--border-strong); }
+  td.method{ font-family:"IBM Plex Mono", monospace; font-size:12.8px; }
+  .bar-cell{ display:flex; align-items:center; gap:8px; justify-content:flex-end; }
+  .bar-track{ width:64px; height:7px; border-radius:4px; background:var(--surface-2); overflow:hidden; flex:none; }
+  .bar-fill{ height:100%; border-radius:4px; }
+  .row-causal .bar-fill{ background:var(--accent); }
+  .row-magnitude .bar-fill{ background:var(--amber); }
+  .row-random .bar-fill{ background:var(--ink-faint); }
+
+  .takeaway{
+    background:var(--accent-soft);
+    border-radius:10px;
+    padding:14px 16px;
+    font-size:14.5px;
+    margin-top:14px;
+  }
+  .takeaway b{ color:var(--accent-ink); }
+
+  /* ---------- closing ---------- */
+  .agenda{
+    background:var(--surface);
+    border:1px solid var(--border);
+    border-radius:12px;
+    padding:22px 24px;
+  }
+  .agenda h2{ font-size:19px; margin:0 0 12px; }
+  .agenda ol{ margin:0; padding-left:20px; display:flex; flex-direction:column; gap:9px; }
+  .agenda li::marker{ color:var(--ink-faint); font-family:"IBM Plex Mono", monospace; font-size:13px; }
+
+  footer{
+    margin-top:44px;
+    padding-top:18px;
+    border-top:1px solid var(--border);
+    font-size:12.5px;
+    color:var(--ink-faint);
+  }
+</style>
+
+<div class="page">
+
+  <header class="masthead">
+    <h1>Синергия в отборе узлов: что подтвердилось, а что нет</h1>
+    <p class="subtitle">Сводка тезисов по двум экспериментам с причинным отбором узлов (Ahmad et al., top-down path selection) и его синергетическим расширением по знаку парного взаимодействия $S$.</p>
+    <div class="sources">
+      <span>Источники:</span>
+      <span class="file">experiment_common_task.ipynb</span>
+      <span class="file">experiment_class_specific_task.ipynb</span>
+    </div>
+  </header>
+
+  <div class="callout">
+    <span class="label">Сквозной вывод</span>
+    <p>Синергия воспроизводимо меняет состав причинно найденной цепи — в обоих ноутбуках, на обоих датасетах. Но ни в одной из проверенных метрик качества или сжатия это изменение не даёт преимущества над более простым as-is, а после дообучения не превосходит даже случайный отбор того же размера. Единственное исключение — необходимость (class-selectivity), и она подтверждается для причинного отбора вообще, а не специально для синергии.</p>
+  </div>
+
+  <!-- ===================== NOTEBOOK 1 ===================== -->
+  <section class="nb-section">
+    <div class="nb-head">
+      <span class="nb-num">01</span>
+      <h2>Прунинг сети целиком</h2>
+    </div>
+    <div class="nb-file file">experiment_common_task.ipynb</div>
+
+    <div class="thesis">
+      <span class="tag rejected">не подтверждено</span>
+      <div class="thesis-body">
+        <p><b>Синергия не улучшает прунинг сети целиком ни при каком размере.</b> При равном числе узлов на слой разница с as-is не превышает 2–3 п.п. без дообучения и исчезает после него; магнитуде весов и greedy backward расширение проигрывает стабильно.</p>
+        <p class="ref">6.4</p>
+      </div>
+    </div>
+
+    <div class="thesis">
+      <span class="tag caveat">артефакт метода</span>
+      <div class="thesis-body">
+        <p><b>Единственный видимый выигрыш синергии — эффект размера слоя, не отбора.</b> На CIFAR-10 расширение даёт 0.669 против 0.645 у as-is, но если as-is просто доукомплектовать до того же размера случайными или топ-ATE фильтрами, результат становится идентичным (разница 0.0000). В conv1 всего 16 фильтров, расширение сохраняет все 16, as-is — 15.2: отличается один фильтр, и почти любой способ его добавить даёт тот же прирост.</p>
+        <p class="ref">6.4, п. 3</p>
+      </div>
+    </div>
+
+    <div class="thesis">
+      <span class="tag confirmed">подтверждено</span>
+      <div class="thesis-body">
+        <p><b>Внутри одного класса правило действительно активно работает.</b> На CIFAR-10 в conv1 половина пар узлов неаддитивна (30.7 синергичных и 31.0 субаддитивных из 120 на класс), цепь класса сокращается с 8.7 до 6.1 узла. Но при объединении цепей всех 10 классов все эти удаления возвращаются — ни один узел, убранный правилом для одного класса, не остался убран в общей сети. Прямая мотивация ко второму ноутбуку: единица анализа — класс, а не сеть целиком.</p>
+        <p class="ref">6.2–6.3</p>
+      </div>
+    </div>
+
+    <div class="thesis">
+      <span class="tag caveat">ограничение постановки</span>
+      <div class="thesis-body">
+        <p><b>Дообучение стирает различия между всеми критериями отбора.</b> Сеть той же ширины, обученная с нуля, не хуже любого отбора (MNIST: 0.9502 против разброса 0.9269–0.9485 у отобранных методов). Ставит под вопрос, доказывает ли эта постановка пользу какого-либо критерия отбора вообще, если разрешено дообучение.</p>
+        <p class="ref">6.4, п. 6</p>
+      </div>
+    </div>
+
+    <div class="thesis">
+      <span class="tag open">к обсуждению</span>
+      <div class="thesis-body">
+        <p><b>Greedy backward выигрывает по качеству везде, но дороже в 3–6 раз по стоимости отбора.</b> Компромисс «качество против цены отбора» не решён и зависит от сценария: разовый прунинг или многократный.</p>
+        <p class="ref">6.4, п. 5</p>
+      </div>
+    </div>
+
+    <div class="thesis">
+      <span class="tag caveat">валидность метрики</span>
+      <div class="thesis-body">
+        <p><b>Контроль на необученной сети даёт разнонаправленный результат.</b> В conv1 неаддитивных пар больше у обученной сети, в conv2 — у необученной. Сам факт «пара значима по тесту» не доказывает, что сеть выучила что-то содержательное — это касается валидности метрики $S$ в целом, а не только правила расширения.</p>
+        <p class="ref">6.7</p>
+      </div>
+    </div>
+
+    <div class="thesis">
+      <span class="tag open">к обсуждению</span>
+      <div class="thesis-body">
+        <p><b>Беглый поиск литературы указывает на вероятные аналоги.</b> Pairwise ablation synergy в интерпретируемости трансформеров, Shapley-value прунинг CNN через кооперативные игры, Hydra effect как правдоподобное объяснение победы greedy backward. Нужен полноценный обзор перед тем, как заявлять новизну комбинации методов — вопрос объёма литобзора для текста работы.</p>
+        <p class="ref">раздел 7, литературная заметка</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== NOTEBOOK 2 ===================== -->
+  <section class="nb-section">
+    <div class="nb-head">
+      <span class="nb-num">02</span>
+      <h2>Класс-специфичные подсети</h2>
+    </div>
+    <div class="nb-file file">experiment_class_specific_task.ipynb</div>
+
+    <div class="thesis">
+      <span class="tag rejected">не подтверждено</span>
+      <div class="thesis-body">
+        <p><b>Негативный результат воспроизводится и без эффекта «возврата» узлов.</b> Даже когда цепь класса не объединяется с цепями других классов, подсети расширения не лучше подсетей той же ширины по магнитуде, а после дообучения не лучше случайных узлов. Два независимых дизайна дают один и тот же вывод — это усиливает, а не ослабляет находку.</p>
+        <p class="ref">6.2–6.3</p>
+      </div>
+    </div>
+
+    <!-- ===== NECESSITY DEEP DIVE ===== -->
+    <div class="deepdive">
+      <span class="tag confirmed">подтверждено</span>
+      <h3>Необходимость (6.4) — единственный устойчиво положительный результат</h3>
+      <p>Разбор подробнее, потому что это единственная часть гипотезы, которая содержательно выдержала проверку — и потому что важно точно понимать, что именно она доказывает, а что нет.</p>
+
+      <h4>Что проверяли (протокол Fig. 10 статьи)</h4>
+      <div class="protocol-steps">
+        <div><span class="n">01</span><span>Берём исходную, необрезанную сеть и найденную цепь класса $k$.</span></div>
+        <div><span class="n">02</span><span>Зануляем в полной сети только 10–20% узлов цепи — самые значимые по вкладу в логит.</span></div>
+        <div><span class="n">03</span><span>Меряем recall класса $k$ — насколько сеть теперь хуже узнаёт именно этот класс.</span></div>
+        <div><span class="n">04</span><span>Меряем точность на остальных 9 классах — «побочный ущерб» от того же зануления.</span></div>
+        <div><span class="n">05</span><span>Селективность = падение recall своего класса − побочный ущерб. Сравниваем с занулением такого же числа случайных узлов и узлов по магнитуде весов.</span></div>
+      </div>
+
+      <h4>Числа (CIFAR-10, занулено 10% цепи)</h4>
+      <table>
+        <caption>Столбец «селективность» — чем выше и положительнее, тем убедительнее, что узлы специфичны именно для своего класса</caption>
+        <thead>
+          <tr><th>Метод</th><th>Recall класса ↓</th><th>Побочный ущерб</th><th>Селективность</th></tr>
+        </thead>
+        <tbody>
+          <tr class="row-causal">
+            <td class="method">as-is</td><td>0.587</td><td>0.153</td>
+            <td><div class="bar-cell"><div class="bar-track"><div class="bar-fill" style="width:87%"></div></div>0.434</div></td>
+          </tr>
+          <tr class="row-causal">
+            <td class="method">расширение</td><td>0.579</td><td>0.139</td>
+            <td><div class="bar-cell"><div class="bar-track"><div class="bar-fill" style="width:88%"></div></div>0.440</div></td>
+          </tr>
+          <tr class="row-magnitude">
+            <td class="method">магнитуда</td><td>0.159</td><td>0.209</td>
+            <td><div class="bar-cell"><div class="bar-track"><div class="bar-fill" style="width:8%"></div></div>−0.05</div></td>
+          </tr>
+          <tr class="row-random">
+            <td class="method">случайный</td><td>0.086</td><td>0.095</td>
+            <td><div class="bar-cell"><div class="bar-track"><div class="bar-fill" style="width:5%"></div></div>−0.01</div></td>
+          </tr>
+        </tbody>
+      </table>
+      <p style="font-size:13px;color:var(--ink-mut)">На MNIST картина та же по знаку: селективность причинных методов 0.55–0.59, магнитуды 0.00–0.04, случайных узлов от −0.02 до −0.01 (диапазон по 10–20% узлов).</p>
+
+      <h4>Что это доказывает — и чего не доказывает</h4>
+      <p><b>Доказывает:</b> причинно отобранные узлы (as-is и расширение) действительно специфичны для своего класса — их удаление избирательно бьёт по нужному классу и почти не задевает остальные. Случайные узлы такой избирательности не создают вообще, узлы по магнитуде создают её со знаком наоборот (вредят чужим классам сильнее, чем своему) — то есть магнитуда находит узлы, важные для сети вообще, а не для конкретного класса.</p>
+      <p><b>Не доказывает:</b> as-is и расширение в этом тесте статистически неразличимы (разница по селективности ≤ 0.019 на CIFAR-10 — внутри разброса между 5 обученными сетями). Правило синергии проходит тест не потому, что нашло более правильные узлы, а потому что использует ту же причинную логику (эффект на логит через интервенции на путях), что и as-is.</p>
+
+      <div class="takeaway">
+        <b>Для текста работы:</b> необходимость валидирует причинный отбор по эффекту на логит как принцип (Algorithm 1 в целом, против магнитуды и случайности) — но не может подаваться как аргумент в пользу именно синергетической надстройки.
+      </div>
+    </div>
+
+    <div class="thesis">
+      <span class="tag rejected">не подтверждено</span>
+      <div class="thesis-body">
+        <p><b>Экономии на полной 10-классовой классификации нет.</b> Стекинг 10 класс-специфичных подсетей стоит дороже исходной сети по MAC (2.77–5.5×) и даёт точность ниже на 4–8 п.п. Сценарий «прунинг через объединение класс-специфичных подсетей» в текущем виде не работает как метод сжатия.</p>
+        <p class="ref">6.5</p>
+      </div>
+    </div>
+
+    <div class="thesis">
+      <span class="tag caveat">артефакт метода</span>
+      <div class="thesis-body">
+        <p><b>~2-кратная экономия в сценарии «это класс $k$?» реальна, но не связана с синергией.</b> Тот же эффект даёт любой отбор того же размера — магнитуда или случайные узлы. Повтор того же паттерна, что и в первом ноутбуке: выигрыш даёт размер подсети, а не критерий, которым её отобрали.</p>
+        <p class="ref">6.5</p>
+      </div>
+    </div>
+
+    <div class="thesis">
+      <span class="tag caveat">валидность метрики</span>
+      <div class="thesis-body">
+        <p><b>После дообучения все подсети — включая случайные — превышают AUROC самой исходной сети.</b> Потому что исходная сеть оптимизирована под совместную 10-классовую задачу, а не под узкое ранжирование «класс $k$ против остальных». Рост AUROC после дообучения — следствие смены цели обучения на более узкую, а не свидетельство качества отбора узлов.</p>
+        <p class="ref">6.2–6.3</p>
+      </div>
+    </div>
+
+    <div class="thesis">
+      <span class="tag open">к обсуждению</span>
+      <div class="thesis-body">
+        <p><b>Синергия измеримо меняет структуру цепи, но не даёт лучшего качества ни в одном из сравнений (6.2, 6.3, 6.5).</b> Развилка: переформулировать, в чём именно должна проявляться польза синергии, если не в качестве отобранной подсети — или явно зафиксировать отсутствие эффекта в этом масштабе сетей.</p>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    Числа — из разделов 6–7 обоих ноутбуков (среднее по 5 независимо обученным сетям на датасет; ссылки в скобках указывают раздел ноутбука).
+  </footer>
+
+</div>
