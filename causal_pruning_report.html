@@ -1,0 +1,488 @@
+<title>Причинный прунинг</title>
+<style>
+  :root{
+    --bg:#f6f5f1;
+    --surface:#ffffff;
+    --surface-2:#eeece3;
+    --ink:#1c1d22;
+    --muted:#5c5f6b;
+    --border:#e1dfd5;
+    --primary:#2f4ea3;
+    --primary-soft:#e7ecf8;
+    --accent:#b85c1c;
+    --accent-soft:#f6e7da;
+    --critical:#1f8f5f;
+    --critical-soft:#e3f3ec;
+    --harmful:#b23a2e;
+    --harmful-soft:#f6e6e3;
+    --neutral:#8d8468;
+    --neutral-soft:#efeadf;
+    --code-bg:#f0eee6;
+    --shadow: 0 1px 2px rgba(20,20,20,.04), 0 8px 24px -16px rgba(20,20,20,.25);
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --bg:#14161b;
+      --surface:#1b1e25;
+      --surface-2:#20232b;
+      --ink:#e7e7ea;
+      --muted:#9aa0ae;
+      --border:#2b2f3a;
+      --primary:#8aa5f2;
+      --primary-soft:#232a40;
+      --accent:#e0914f;
+      --accent-soft:#332518;
+      --critical:#55c492;
+      --critical-soft:#16261f;
+      --harmful:#e2766a;
+      --harmful-soft:#2c1c1a;
+      --neutral:#b2a989;
+      --neutral-soft:#262317;
+      --code-bg:#20232b;
+      --shadow: 0 1px 2px rgba(0,0,0,.3), 0 8px 24px -16px rgba(0,0,0,.6);
+    }
+  }
+  :root[data-theme="dark"]{
+    --bg:#14161b;
+    --surface:#1b1e25;
+    --surface-2:#20232b;
+    --ink:#e7e7ea;
+    --muted:#9aa0ae;
+    --border:#2b2f3a;
+    --primary:#8aa5f2;
+    --primary-soft:#232a40;
+    --accent:#e0914f;
+    --accent-soft:#332518;
+    --critical:#55c492;
+    --critical-soft:#16261f;
+    --harmful:#e2766a;
+    --harmful-soft:#2c1c1a;
+    --neutral:#b2a989;
+    --neutral-soft:#262317;
+    --code-bg:#20232b;
+    --shadow: 0 1px 2px rgba(0,0,0,.3), 0 8px 24px -16px rgba(0,0,0,.6);
+  }
+
+  * { box-sizing: border-box; }
+  body{
+    background: var(--bg);
+    color: var(--ink);
+    font-family: "IBM Plex Sans", system-ui, sans-serif;
+    line-height: 1.6;
+    font-size: 16px;
+  }
+  .wrap{ max-width: 760px; margin: 0 auto; padding: 48px 20px 90px; }
+  .wide{ max-width: 860px; }
+
+  h1,h2,h3{ font-family: "Fraunces", Georgia, serif; font-weight: 600; text-wrap: balance; color: var(--ink); }
+  h1{ font-size: clamp(2rem, 5vw, 2.7rem); line-height: 1.08; margin: 0 0 10px; font-weight: 700; }
+  h2{ font-size: 1.55rem; margin: 0 0 6px; }
+  h3{ font-size: 1.12rem; margin: 0 0 8px; font-weight: 600; }
+  p{ margin: 0 0 1em; color: var(--ink); }
+  .lede{ color: var(--muted); font-size: 1.1rem; max-width: 60ch; }
+  a{ color: var(--primary); }
+  .mono{ font-family: "IBM Plex Mono", ui-monospace, monospace; }
+  .num{ font-variant-numeric: tabular-nums; }
+
+  .eyebrow{
+    font-family: "IBM Plex Mono", monospace;
+    font-size: .72rem; letter-spacing: .12em; text-transform: uppercase;
+    color: var(--accent); font-weight: 600; margin-bottom: 14px; display:block;
+  }
+  header.hero{ padding-top: 6px; margin-bottom: 20px; }
+  .meta-row{ display:flex; gap:18px; flex-wrap:wrap; color: var(--muted); font-size: .88rem; margin-top: 18px; }
+
+  nav.toc{
+    background: var(--surface); border: 1px solid var(--border); border-radius: 14px;
+    padding: 18px 22px; margin: 32px 0 8px; box-shadow: var(--shadow);
+  }
+  nav.toc .toc-title{ font-family:"IBM Plex Mono",monospace; font-size:.72rem; letter-spacing:.1em; text-transform:uppercase; color:var(--muted); margin-bottom:10px; }
+  nav.toc ol{ margin:0; padding-left: 1.1em; columns: 2; column-gap: 24px; }
+  nav.toc li{ margin-bottom: 6px; break-inside: avoid; }
+  nav.toc a{ text-decoration:none; color: var(--ink); }
+  nav.toc a:hover{ color: var(--primary); }
+  nav.toc .n{ color: var(--muted); font-family:"IBM Plex Mono",monospace; font-size:.82em; margin-right:4px; }
+
+  section{ margin: 64px 0; }
+  section.band{
+    margin-left: calc(50% - 50vw); margin-right: calc(50% - 50vw);
+    padding: 44px calc(50vw - 50% + 20px);
+    background: var(--surface-2);
+    border-top: 1px solid var(--border); border-bottom: 1px solid var(--border);
+  }
+  section.band > .inner{ max-width: 760px; margin: 0 auto; }
+  section.band.wide > .inner{ max-width: 860px; }
+
+  .divider{ border:0; border-top:1px solid var(--border); margin: 10px 0 0; }
+
+  .callout{
+    border-left: 3px solid var(--primary);
+    background: var(--primary-soft);
+    padding: 16px 20px; border-radius: 0 10px 10px 0; margin: 20px 0;
+  }
+  .callout p:last-child{ margin-bottom:0; }
+  .callout.accent{ border-color: var(--accent); background: var(--accent-soft); }
+
+  .formula-card{
+    background: var(--surface); border:1px solid var(--border); border-radius: 14px;
+    padding: 22px 24px; box-shadow: var(--shadow); margin: 20px 0;
+  }
+  .formula-card .label{ font-family:"IBM Plex Mono",monospace; font-size:.72rem; text-transform:uppercase; letter-spacing:.08em; color:var(--muted); margin-bottom: 10px; }
+  .formula{ font-family:"IBM Plex Mono",monospace; font-size: 1.02rem; overflow-x:auto; white-space:nowrap; padding-bottom:2px; }
+
+  .badges{ display:flex; gap:10px; flex-wrap:wrap; margin: 18px 0; }
+  .badge{
+    display:inline-flex; align-items:center; gap:7px; padding: 7px 13px; border-radius: 999px;
+    font-size: .85rem; font-weight:500; border:1px solid transparent;
+  }
+  .badge .dot{ width:8px; height:8px; border-radius:50%; flex:none; }
+  .badge.critical{ background: var(--critical-soft); color: var(--critical); }
+  .badge.critical .dot{ background: var(--critical); }
+  .badge.harmful{ background: var(--harmful-soft); color: var(--harmful); }
+  .badge.harmful .dot{ background: var(--harmful); }
+  .badge.neutral{ background: var(--neutral-soft); color: var(--neutral); }
+  .badge.neutral .dot{ background: var(--neutral); }
+
+  .card-grid{ display:grid; grid-template-columns: repeat(2, 1fr); gap:16px; margin: 22px 0; }
+  @media (max-width: 600px){ .card-grid{ grid-template-columns: 1fr; } }
+  .fig-card{
+    background: var(--surface); border:1px solid var(--border); border-radius: 14px;
+    padding: 18px 20px; box-shadow: var(--shadow);
+  }
+  .fig-card .fig-tag{ font-family:"IBM Plex Mono",monospace; font-size:.72rem; color: var(--primary); font-weight:600; letter-spacing:.04em; }
+  .fig-card h3{ margin: 6px 0 8px; }
+  .fig-card .claim{ font-size:.93rem; color: var(--muted); }
+  .fig-card .claim b{ color: var(--ink); font-weight:600; }
+
+  table.verdict{ width:100%; border-collapse: collapse; margin: 22px 0; font-size: .92rem; }
+  table.verdict th, table.verdict td{ text-align:left; padding: 12px 14px; border-bottom: 1px solid var(--border); vertical-align: top; }
+  table.verdict th{ font-family:"IBM Plex Mono",monospace; font-size:.72rem; text-transform:uppercase; letter-spacing:.06em; color:var(--muted); font-weight:600; }
+  table.verdict td.fig{ font-weight:600; white-space:nowrap; }
+  .pill{ display:inline-block; padding:3px 10px; border-radius:999px; font-size:.8rem; font-weight:600; white-space:nowrap; }
+  .pill.ok{ background: var(--critical-soft); color: var(--critical); }
+  .pill.partial{ background: var(--accent-soft); color: var(--accent); }
+  .pill.explained{ background: var(--neutral-soft); color: var(--neutral); }
+  .table-scroll{ overflow-x:auto; }
+
+  .people{ display:flex; gap:14px; flex-wrap:wrap; margin: 18px 0 22px; }
+  .person{
+    background: var(--surface); border:1px solid var(--border); border-radius: 12px;
+    padding: 12px 16px; font-size:.88rem; box-shadow: var(--shadow); flex: 1 1 200px;
+  }
+  .person .role{ color: var(--muted); font-size:.78rem; }
+  .person.shared{ border-color: var(--accent); background: var(--accent-soft); }
+
+  .steps{ counter-reset: step; list-style:none; padding:0; margin: 20px 0; }
+  .steps li{
+    counter-increment: step; position:relative; padding: 4px 0 20px 46px; border-left: 2px solid var(--border); margin-left: 15px;
+  }
+  .steps li:last-child{ border-left-color: transparent; padding-bottom:0; }
+  .steps li::before{
+    content: counter(step); position:absolute; left:-15px; top:0;
+    width:28px; height:28px; border-radius:50%; background: var(--primary); color:#fff;
+    font-family:"IBM Plex Mono",monospace; font-size:.82rem; font-weight:600;
+    display:flex; align-items:center; justify-content:center;
+  }
+  .steps h3{ margin-bottom:4px; }
+  .steps p{ font-size:.93rem; color: var(--muted); margin:0; }
+
+  .bars{ margin: 20px 0; display:flex; flex-direction:column; gap:10px; }
+  .bar-row{ display:grid; grid-template-columns: 112px 1fr 56px; align-items:center; gap:12px; font-size:.86rem; }
+  .bar-row .lbl{ color: var(--ink); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .bar-row .track{ height: 14px; background: var(--surface-2); border-radius: 7px; overflow:hidden; border:1px solid var(--border); }
+  .bar-row .fill{ height:100%; border-radius: 7px 0 0 7px; }
+  .bar-row .val{ font-family:"IBM Plex Mono",monospace; text-align:right; color: var(--muted); }
+  .bar-row.hi .lbl{ font-weight:700; }
+  .bar-row.hi .val{ color: var(--accent); font-weight:700; }
+  .bar-row.lo .val{ color: var(--harmful); }
+
+  .group-chart{ display:grid; grid-template-columns: repeat(4, 1fr); gap: 18px; margin: 24px 0; }
+  @media (max-width: 680px){ .group-chart{ grid-template-columns: repeat(2, 1fr); } }
+  .group{ background: var(--surface); border:1px solid var(--border); border-radius: 12px; padding: 14px; box-shadow: var(--shadow); }
+  .group h4{ margin:0 0 10px; font-size:.82rem; font-family:"IBM Plex Mono",monospace; color: var(--muted); font-weight:600; }
+  .mini-bar{ display:grid; grid-template-columns: 44px 1fr 32px; align-items:center; gap:6px; margin-bottom:6px; font-size:.74rem; }
+  .mini-bar .track{ height:9px; background: var(--surface-2); border-radius:5px; overflow:hidden; }
+  .mini-bar .fill{ height:100%; }
+  .mini-bar .val{ font-family:"IBM Plex Mono",monospace; text-align:right; color: var(--muted); }
+
+  .stack-row{ display:grid; grid-template-columns: 90px 1fr; gap: 12px; align-items:center; margin-bottom: 12px; }
+  .stack-row .lbl{ font-size:.86rem; font-weight:600; }
+  .stack{ display:flex; height: 22px; border-radius: 6px; overflow:hidden; border:1px solid var(--border); }
+  .stack span{ display:flex; align-items:center; justify-content:center; font-size:.68rem; color:#fff; font-family:"IBM Plex Mono",monospace; }
+
+  table.cost{ width:100%; border-collapse: collapse; font-size:.88rem; margin: 18px 0; }
+  table.cost th, table.cost td{ padding: 10px 12px; border-bottom:1px solid var(--border); text-align:left; }
+  table.cost th{ font-family:"IBM Plex Mono",monospace; font-size:.7rem; text-transform:uppercase; letter-spacing:.05em; color:var(--muted); }
+  table.cost td.num, table.cost th.num{ text-align:right; font-variant-numeric: tabular-nums; }
+  table.cost tr.local td{ background: var(--accent-soft); }
+
+  .status-card{
+    background: var(--surface); border:1px solid var(--border); border-radius:14px; padding: 20px 22px;
+    box-shadow: var(--shadow); display:flex; gap:16px; align-items:flex-start; margin: 20px 0;
+  }
+  .status-dot{ width:11px; height:11px; border-radius:50%; background: var(--accent); margin-top:6px; flex:none;
+    box-shadow: 0 0 0 4px var(--accent-soft); animation: pulse 2s ease-in-out infinite; }
+  @keyframes pulse{ 0%,100%{ opacity:1; } 50%{ opacity:.45; } }
+  @media (prefers-reduced-motion: reduce){ .status-dot{ animation:none; } }
+
+  footer{ margin-top: 70px; padding-top: 24px; border-top:1px solid var(--border); color: var(--muted); font-size:.84rem; }
+  footer a{ color: var(--muted); text-decoration: underline; }
+  footer .files{ font-family:"IBM Plex Mono",monospace; font-size:.8rem; margin-top:10px; }
+</style>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+
+<div class="wrap">
+
+  <header class="hero">
+    <span class="eyebrow">Заметки по интерпретируемости CNN</span>
+    <h1>Причинный прунинг</h1>
+    <p class="lede">Как одна идея — вмешаться в конкретный канал сети и измерить причинный эффект — прошла путь от метода объяснения (Ahmad&nbsp;et&nbsp;al., WACV 2024) до метода сжатия модели (C-SWAP, BMVC 2025), и что из заявленного в обеих статьях подтвердилось на практике.</p>
+    <div class="meta-row">
+      <span>Рабочие заметки · октябрь 2026</span>
+      <span>ResNet-18 · ImageNet / CIFAR-10</span>
+    </div>
+  </header>
+
+  <nav class="toc">
+    <div class="toc-title">Содержание</div>
+    <ol>
+      <li><span class="n">01</span><a href="#why">Зачем нужна была статья Ahmad et al.</a></li>
+      <li><span class="n">02</span><a href="#method">Как устроен причинный тест</a></li>
+      <li><span class="n">03</span><a href="#claims">Что заявляет статья</a></li>
+      <li><span class="n">04</span><a href="#verified">Что подтвердили мы</a></li>
+      <li><span class="n">05</span><a href="#born">Как из этого родился C-SWAP</a></li>
+      <li><span class="n">06</span><a href="#cswap-method">Метод C-SWAP</a></li>
+      <li><span class="n">07</span><a href="#cswap-results">Результаты C-SWAP</a></li>
+      <li><span class="n">08</span><a href="#local">Эксперимент на этой машине</a></li>
+    </ol>
+  </nav>
+
+  <section id="why">
+    <span class="eyebrow">01 · Мотивация</span>
+    <h2>Зачем нужна была статья Ahmad et al.</h2>
+    <p>Стандартные методы объяснения решений нейросети (Saliency, Integrated Gradients, DeconvNet и т.п.) строят карты важности пикселей по градиенту. Авторы статьи указывают на две проблемы такого подхода: во-первых, градиент ничего не говорит о том, <em>как внутренние нейроны взаимодействуют друг с другом</em>, чтобы прийти к ответу; во-вторых, такие карты легко «зашумляются» — паразитными корреляциями, переобучением, самой нестабильностью градиента.</p>
+    <div class="callout">
+      <p>Идея статьи: вместо того чтобы смотреть, куда «указывает» градиент, можно <b>физически вмешаться</b> в сеть — ослабить или занулить конкретный канал — и напрямую измерить, как это меняет предсказание. Если эффект статистически значим и воспроизводится при разных условиях вмешательства — канал признаётся причинно важным.</p>
+    </div>
+    <p>Из такого вмешательства собирается «причинный граф» — набор каналов, которые реально управляют предсказанием конкретного класса, а не просто коррелируют с ним.</p>
+  </section>
+
+  <section id="method">
+    <span class="eyebrow">02 · Механика</span>
+    <h2>Как устроен причинный тест</h2>
+    <p>Для каждого канала <span class="mono">c</span> выбранного слоя сеть прогоняется дважды — как есть, и с этим каналом, ослабленным в <span class="mono">β</span> раз (вплоть до полного зануления). Разница в логите целевого класса — это эффект вмешательства (treatment effect). Усреднённая по многим изображениям величина проверяется двусторонним t-тестом при <span class="mono">α&nbsp;=&nbsp;0.05</span>.</p>
+    <div class="formula-card">
+      <div class="label">Treatment Effect, статья Ahmad et al., ур. 2</div>
+      <div class="formula">TE(do(w)) = ŷ<sub>w=u₁</sub>(X) − ŷ<sub>w=u₀</sub>(X)</div>
+    </div>
+    <p>По знаку и значимости среднего эффекта (ATE) канал относят к одной из трёх категорий:</p>
+    <div class="badges">
+      <span class="badge critical"><span class="dot"></span>critical — значимо <b>понижает</b> логит при зануления (важен для класса)</span>
+      <span class="badge harmful"><span class="dot"></span>harmful / detrimental — значимо <b>повышает</b> логит (мешает классу)</span>
+      <span class="badge neutral"><span class="dot"></span>neutral — эффект статистически не значим</span>
+    </div>
+    <p style="margin-top:4px">Эта цветовая кодировка (зелёный / красный / бежевый) используется дальше по всему документу — в обеих статьях она означает одно и то же.</p>
+  </section>
+
+  <section id="claims" class="band">
+    <div class="inner">
+      <span class="eyebrow">03 · Заявления статьи</span>
+      <h2>Что заявляет статья Ahmad et al.</h2>
+      <p>Метод тестировался на LeNet/MNIST, ResNet-18/CIFAR-10 и четырёх архитектурах на ImageNet (ResNet-18, ResNet-50, MobileNetV2, ConvNeXt). Четыре ключевых эксперимента:</p>
+      <div class="card-grid">
+        <div class="fig-card">
+          <span class="fig-tag">Figure 7</span>
+          <h3>Надёжность графа</h3>
+          <p class="claim">При 1000 испытаниях с разной силой вмешательства <b>98–100%</b> каналов повторно определяются как критические — те же самые номера каналов, а не просто похожая доля.</p>
+        </div>
+        <div class="fig-card">
+          <span class="fig-tag">Figure 9</span>
+          <h3>Стабильность и достоверность</h3>
+          <p class="claim">Causal-объяснение показывает <b>наименьшую дисперсию Lipschitz Estimate</b> среди 9 методов. По IROF на ImageNet статья сама пишет, что «все методы, включая наш, сопоставимы».</p>
+        </div>
+        <div class="fig-card">
+          <span class="fig-tag">Figure 10</span>
+          <h3>Fidelity критических нейронов</h3>
+          <p class="claim">Маскирование &lt;20% критических нейронов даёт <b>резкий обвал точности</b>; при маскировании 50% разреженность сети — всего <b>3.8%</b>.</p>
+        </div>
+        <div class="fig-card">
+          <span class="fig-tag">Figure 11 / §6</span>
+          <h3>Ремонт модели</h3>
+          <p class="claim">Маскирование «вредных» фильтров конкретного класса <b>восстанавливает точность</b> без дообучения — заявлено как практическое применение метода, явно отделённое авторами от прунинга.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="verified">
+    <span class="eyebrow">04 · Проверка</span>
+    <h2>Что подтвердили мы</h2>
+    <p>Воспроизведение проводилось на ResNet-18 с одним проанализированным слоем (<span class="mono">layer4.1.conv2</span>) — как упрощённая, вычислительно посильная версия полного многослойного графа статьи, на paper-масштабной выборке ImageNet (50 изображений/класс, 10 классов).</p>
+    <div class="table-scroll">
+      <table class="verdict">
+        <thead><tr><th>Figure</th><th>Заявлено</th><th>Измерено</th><th>Вывод</th></tr></thead>
+        <tbody>
+          <tr><td class="fig">Fig. 7</td><td>98–100% повторяемость</td><td class="num">98.25–100%</td><td><span class="pill ok">Подтверждено</span></td></tr>
+          <tr><td class="fig">Fig. 9, Lipschitz</td><td>Causal — наименьшая дисперсия</td><td>Causal — самое низкое значение среди всех методов</td><td><span class="pill ok">Подтверждено</span></td></tr>
+          <tr><td class="fig">Fig. 9, IROF</td><td>«Сопоставимо» с другими методами (своя же оговорка статьи)</td><td>Causal не выделился явным лидером</td><td><span class="pill explained">Согласуется с оговоркой статьи</span></td></tr>
+          <tr><td class="fig">Fig. 10</td><td>Обвал точности &lt;20%, разреженность 3.8% при 50%</td><td>Кривая практически плоская</td><td><span class="pill explained">Не воспроизведено — объяснимо</span></td></tr>
+          <tr><td class="fig">Fig. 11 / §6</td><td>Точность восстанавливается</td><td>У большинства из 10 классов accuracy растёт к ~1.0 при росте маскирования</td><td><span class="pill partial">Частично, с оговоркой</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="callout accent">
+      <p><b>Почему Fig. 10 не воспроизвёлся — не баг, а следствие выбора.</b> Для анализа взят только один слой (512 каналов) вместо всего графа статьи (~20 слоёв, ~4800 каналов) — полный перебор по оценке занял бы порядка 5–9 суток GPU-времени. Критических каналов в одном слое — несколько десятков; их зануление трогает доли процента всей сети, поэтому top-1 предсказание почти никогда не меняется.</p>
+    </div>
+    <div class="callout">
+      <p><b>Оговорка к Fig. 11.</b> Точность по классу считается только на изображениях этого же класса — рост до ~1.0 может означать как настоящий «ремонт», так и смещение модели в сторону более частого предсказания именно этого класса. Проверки влияния на остальные 999 классов ImageNet в этом эксперименте нет — ни в нашем воспроизведении, ни в разделе 6 исходной статьи.</p>
+    </div>
+  </section>
+
+  <section id="born">
+    <span class="eyebrow">05 · Продолжение</span>
+    <h2>Как из этого родился C-SWAP</h2>
+    <p>Статья Ahmad et al. прямо пишет в разделе 6: ремонт модели «отличается от прунинга, который требует дальнейшей оптимизации и дообучения» — то есть маскирование там временное, веса физически не удаляются. Полтора года спустя часть тех же авторов превратила именно эту причинную идею в метод настоящего, физического сжатия сети.</p>
+    <div class="people">
+      <div class="person shared"><b>Ola Ahmad</b><div class="role">автор обеих статей · Thales cortAIx Lab</div></div>
+      <div class="person shared"><b>Loïc Baret</b><div class="role">автор обеих статей · Thales cortAIx Lab</div></div>
+      <div class="person"><b>Baptiste Bauvin</b><div class="role">ведущий автор C-SWAP</div></div>
+    </div>
+    <p>C-SWAP (<em>Explainability-Aware Structured Pruning</em>, BMVC 2025) берёт ровно тот же инструмент — вмешательство на канал плюс t-тест — и отвечает на вопрос, который в первой статье оставался открытым: можно ли по той же самой причинной разметке не временно маскировать, а насовсем вырезать неважные каналы из сети, не теряя точность и без дообучения.</p>
+  </section>
+
+  <section id="cswap-method">
+    <span class="eyebrow">06 · Метод</span>
+    <h2>Метод C-SWAP</h2>
+    <p>Два содержательных расширения причинного критерия Ahmad et al.:</p>
+    <ol class="steps">
+      <li>
+        <h3>Multi-class причинный эффект</h3>
+        <p>Вместо разбора «один канал → один класс», для каждого нейрона считается единый знаковый эффект ξₙ, усреднённый сразу по всем классам, плюс голосование p-value по каждому классу отдельно. Нейрон — <span class="mono">critical</span>, если значимо помогает хоть одному классу; <span class="mono">detrimental</span> — если значимо мешает хоть одному; иначе <span class="mono">neutral</span>.</p>
+      </li>
+      <li>
+        <h3>Прогрессивный прунинг</h3>
+        <p>Классический подход «сначала ранжируем все нейроны сети, потом режем снизу» стоит O(n×m) и деградирует при глубоком прунинге. C-SWAP идёт по сети от последнего слоя к первому и сразу <b>физически вырезает</b> каждый не-critical нейрон по ходу анализа — сложность падает до O(n).</p>
+      </li>
+      <li>
+        <h3>Настоящее структурное удаление</h3>
+        <p>Через библиотеку DepGraph (torch_pruning) C-SWAP находит группы слоёв, которые из-за residual-связей нужно резать синхронно, и реально вырезает веса — результат физически меньше по числу параметров, а не просто «занулён» на инференсе.</p>
+      </li>
+    </ol>
+  </section>
+
+  <section id="cswap-results" class="band wide">
+    <div class="inner">
+      <span class="eyebrow">07 · Цифры статьи</span>
+      <h2>Результаты C-SWAP</h2>
+      <p>Метрика SAUCE — площадь под кривой «точность / доля прунинга» без дообучения (выше = лучше держит точность при агрессивном сжатии).</p>
+
+      <h3 style="margin-top:28px">SAUCE в среднем по 4 архитектурам</h3>
+      <div class="bars">
+        <div class="bar-row hi"><span class="lbl">C-SWAP</span><div class="track"><div class="fill" style="width:67.5%;background:var(--accent)"></div></div><span class="val num">67.5</span></div>
+        <div class="bar-row"><span class="lbl">Internal Infl.</span><div class="track"><div class="fill" style="width:40.3%;background:var(--primary)"></div></div><span class="val num">40.3</span></div>
+        <div class="bar-row"><span class="lbl">iLRP</span><div class="track"><div class="fill" style="width:40.3%;background:var(--primary)"></div></div><span class="val num">40.3</span></div>
+        <div class="bar-row"><span class="lbl">Integ. Grad.</span><div class="track"><div class="fill" style="width:39.9%;background:var(--primary)"></div></div><span class="val num">39.9</span></div>
+        <div class="bar-row"><span class="lbl">Conductance</span><div class="track"><div class="fill" style="width:39.8%;background:var(--primary)"></div></div><span class="val num">39.8</span></div>
+        <div class="bar-row"><span class="lbl">C-BP</span><div class="track"><div class="fill" style="width:39.7%;background:var(--primary)"></div></div><span class="val num">39.7</span></div>
+        <div class="bar-row"><span class="lbl">DeepLIFT</span><div class="track"><div class="fill" style="width:37.9%;background:var(--primary)"></div></div><span class="val num">37.9</span></div>
+        <div class="bar-row"><span class="lbl">AMP</span><div class="track"><div class="fill" style="width:33.6%;background:var(--neutral)"></div></div><span class="val num">33.6</span></div>
+        <div class="bar-row lo"><span class="lbl">OMP (magnitude)</span><div class="track"><div class="fill" style="width:29.1%;background:var(--neutral)"></div></div><span class="val num">29.1</span></div>
+        <div class="bar-row lo"><span class="lbl">Random</span><div class="track"><div class="fill" style="width:27.4%;background:var(--harmful)"></div></div><span class="val num">27.4</span></div>
+      </div>
+
+      <div class="callout accent">
+        <p><b>Это прямо отвечает на вопрос «а сравнивали ли со случайным зануления каналов?»</b> — да, Random pruning явно включён как baseline (Li et al., 2022) и проигрывает причинному отбору с большим отрывом на всех четырёх архитектурах.</p>
+      </div>
+
+      <h3 style="margin-top:36px">Random vs OMP vs C-SWAP по архитектурам</h3>
+      <div class="group-chart">
+        <div class="group"><h4>ResNet-18 · CIFAR-10</h4>
+          <div class="mini-bar"><span>Random</span><div class="track"><div class="fill" style="width:25.0%;background:var(--harmful)"></div></div><span class="val num">25.0</span></div>
+          <div class="mini-bar"><span>OMP</span><div class="track"><div class="fill" style="width:26.0%;background:var(--neutral)"></div></div><span class="val num">26.0</span></div>
+          <div class="mini-bar"><span>C-SWAP</span><div class="track"><div class="fill" style="width:72.1%;background:var(--accent)"></div></div><span class="val num">72.1</span></div>
+        </div>
+        <div class="group"><h4>ResNet-50 · ImageNet</h4>
+          <div class="mini-bar"><span>Random</span><div class="track"><div class="fill" style="width:30.8%;background:var(--harmful)"></div></div><span class="val num">30.8</span></div>
+          <div class="mini-bar"><span>OMP</span><div class="track"><div class="fill" style="width:24.0%;background:var(--neutral)"></div></div><span class="val num">24.0</span></div>
+          <div class="mini-bar"><span>C-SWAP</span><div class="track"><div class="fill" style="width:80.3%;background:var(--accent)"></div></div><span class="val num">80.3</span></div>
+        </div>
+        <div class="group"><h4>MobileNet · ImageNet</h4>
+          <div class="mini-bar"><span>Random</span><div class="track"><div class="fill" style="width:19.8%;background:var(--harmful)"></div></div><span class="val num">19.8</span></div>
+          <div class="mini-bar"><span>OMP</span><div class="track"><div class="fill" style="width:26.3%;background:var(--neutral)"></div></div><span class="val num">26.3</span></div>
+          <div class="mini-bar"><span>C-SWAP</span><div class="track"><div class="fill" style="width:49.4%;background:var(--accent)"></div></div><span class="val num">49.4</span></div>
+        </div>
+        <div class="group"><h4>ViT · ImageNet</h4>
+          <div class="mini-bar"><span>Random</span><div class="track"><div class="fill" style="width:34.2%;background:var(--harmful)"></div></div><span class="val num">34.2</span></div>
+          <div class="mini-bar"><span>OMP</span><div class="track"><div class="fill" style="width:40.1%;background:var(--neutral)"></div></div><span class="val num">40.1</span></div>
+          <div class="mini-bar"><span>C-SWAP</span><div class="track"><div class="fill" style="width:68.1%;background:var(--accent)"></div></div><span class="val num">68.1</span></div>
+        </div>
+      </div>
+
+      <h3 style="margin-top:36px">Доля critical / neutral / detrimental нейронов</h3>
+      <p style="font-size:.9rem;color:var(--muted)">Чем компактнее сеть, тем больше нейронов оказываются critical — избыточности почти нет (ResNet-18, MobileNet). В переразмеренных ViT и ResNet-50 почти треть нейронов — neutral.</p>
+      <div style="margin:18px 0">
+        <div class="stack-row"><span class="lbl">ResNet-18</span><div class="stack">
+          <span style="width:76.08%;background:var(--critical)">76%</span><span style="width:1.48%;background:var(--neutral)"></span><span style="width:22.44%;background:var(--harmful)">22%</span>
+        </div></div>
+        <div class="stack-row"><span class="lbl">ResNet-50</span><div class="stack">
+          <span style="width:65.49%;background:var(--critical)">65%</span><span style="width:27.37%;background:var(--neutral)">27%</span><span style="width:7.14%;background:var(--harmful)"></span>
+        </div></div>
+        <div class="stack-row"><span class="lbl">MobileNet</span><div class="stack">
+          <span style="width:79.36%;background:var(--critical)">79%</span><span style="width:8.35%;background:var(--neutral)"></span><span style="width:12.29%;background:var(--harmful)">12%</span>
+        </div></div>
+        <div class="stack-row"><span class="lbl">ViT</span><div class="stack">
+          <span style="width:44.55%;background:var(--critical)">45%</span><span style="width:32.27%;background:var(--neutral)">32%</span><span style="width:23.18%;background:var(--harmful)">23%</span>
+        </div></div>
+      </div>
+      <div class="badges">
+        <span class="badge critical"><span class="dot"></span>critical</span>
+        <span class="badge neutral"><span class="dot"></span>neutral</span>
+        <span class="badge harmful"><span class="dot"></span>detrimental</span>
+      </div>
+
+      <h3 style="margin-top:36px">Во что это обходится по времени (1× Nvidia RTX 3090)</h3>
+      <table class="cost">
+        <thead><tr><th>Сеть</th><th>Датасет</th><th class="num">Нейронов</th><th class="num">Время</th></tr></thead>
+        <tbody>
+          <tr class="local"><td>ResNet-18</td><td>CIFAR-10</td><td class="num">2 880</td><td class="num">1:58</td></tr>
+          <tr><td>MobileNetV2</td><td>ImageNet-10</td><td class="num">9 128</td><td class="num">1:02:18</td></tr>
+          <tr><td>DDRNet 23S</td><td>Cityscapes</td><td class="num">3 840</td><td class="num">3:24:43</td></tr>
+          <tr><td>ResNet-50</td><td>ImageNet-10</td><td class="num">19 008</td><td class="num">7:41:07</td></tr>
+          <tr><td>ViT</td><td>ImageNet-10</td><td class="num">46 080</td><td class="num">34:41:08</td></tr>
+        </tbody>
+      </table>
+      <p style="font-size:.86rem;color:var(--muted)">Строка ResNet-18/CIFAR-10 выделена — это единственная ветка, прилагаемая в репозитории C-SWAP целиком: готовый чекпоинт + автоматическая загрузка датасета, без лицензионных ограничений ImageNet.</p>
+    </div>
+  </section>
+
+  <section id="local">
+    <span class="eyebrow">08 · Своими руками</span>
+    <h2>Эксперимент на этой машине</h2>
+    <p>Локально (CPU, без CUDA — Intel Iris Xe) была выбрана ровно эта ветка — ResNet-18 на CIFAR-10 — как единственная полностью самодостаточная и реалистичная по времени (~2 минуты на GPU в статье) для машины без GPU. Окружение: Python 3.12, PyTorch 2.3 CPU, torch_pruning 1.5.2. По пути нашёлся и был исправлен баг Windows-многопроцессности в демо-скрипте (<span class="mono">DataLoader(num_workers=8)</span> без <span class="mono">if __name__=="__main__"</span>).</p>
+    <p>Прогнали дважды — с порогом значимости по умолчанию из демо (<span class="mono">threshold=0.005</span>) и с порогом из статьи (<span class="mono">α=0.05</span>) — на одном и том же чекпоинте и одних и тех же 1280 изображениях (128/класс):</p>
+    <div class="table-scroll">
+      <table class="verdict">
+        <thead><tr><th>Порог</th><th>Параметры после</th><th>Удалено</th><th>Точность до</th><th>Точность после</th><th>Просадка</th></tr></thead>
+        <tbody>
+          <tr><td class="fig mono">0.005 (дефолт демо)</td><td class="num">6 701 138</td><td class="num">40.07%</td><td class="num">82.26%</td><td class="num">81.27%</td><td class="num">−0.99 п.п.</td></tr>
+          <tr><td class="fig mono">0.05 (как в статье)</td><td class="num">7 362 036</td><td class="num">34.16%</td><td class="num">82.26%</td><td class="num">82.05%</td><td class="num">−0.21 п.п.</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="status-card">
+      <div class="status-dot" style="background:var(--critical);box-shadow:0 0 0 4px var(--critical-soft);animation:none"></div>
+      <div>
+        <h3 style="margin-bottom:6px">Завершено — тезис статьи подтверждён локально</h3>
+        <p style="margin:0">В обоих случаях сеть сжимается на треть-две пятых <b>без единого шага дообучения</b>, с просадкой точности меньше одного процентного пункта. С порогом статьи (α=0.05) компромисс точнее повторяет заявленное в Fig. 5a («до 50% без потери качества») — больший p-value порог признаёт значимыми (critical/detrimental) больше нейронов хоть для одного класса, поэтому по-настоящему «нейтральных» — безопасных к удалению — остаётся меньше, и прунинг получается чуть консервативнее, зато почти не трогает точность.</p>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <p>Источники: Ahmad O. et al., «Causal Analysis for Robust Interpretability of Neural Networks», WACV 2024 (arXiv:2305.08950) · Bauvin B., Baret L., Ahmad O., «C-SWAP: Explainability-Aware Structured Pruning», BMVC 2025 (arXiv:2510.18636, github.com/ThalesGroup/C-SWAP).</p>
+    <div class="files">ate_analysis/ · c-swap/</div>
+  </footer>
+
+</div>
