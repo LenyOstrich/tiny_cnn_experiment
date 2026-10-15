@@ -72,7 +72,7 @@
     font-size: 16px;
   }
   .wrap{ max-width: 760px; margin: 0 auto; padding: 48px 20px 90px; }
-  .wide{ max-width: 1200px; }
+  .wide{ max-width: 860px; }
 
   h1,h2,h3{ font-family: "Fraunces", Georgia, serif; font-weight: 600; text-wrap: balance; color: var(--ink); }
   h1{ font-size: clamp(2rem, 5vw, 2.7rem); line-height: 1.08; margin: 0 0 10px; font-weight: 700; }
@@ -228,6 +228,32 @@
   footer{ margin-top: 70px; padding-top: 24px; border-top:1px solid var(--border); color: var(--muted); font-size:.84rem; }
   footer a{ color: var(--muted); text-decoration: underline; }
   footer .files{ font-family:"IBM Plex Mono",monospace; font-size:.8rem; margin-top:10px; }
+  .bars,
+  .group-chart,
+  .stack-row,
+  .stack {
+    min-width: 0;
+  }
+
+  .bar-row {
+    min-width: 0;
+  }
+
+  .bar-row .track {
+    min-width: 0;
+    position: relative;
+  }
+
+  .bar-row .fill,
+  .mini-bar .fill {
+    display: block;
+    flex-shrink: 0;
+  }
+
+  .group,
+  .fig-card {
+    min-width: 0;
+  }
 </style>
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
