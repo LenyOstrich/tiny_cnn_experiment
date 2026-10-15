@@ -228,31 +228,18 @@
   footer{ margin-top: 70px; padding-top: 24px; border-top:1px solid var(--border); color: var(--muted); font-size:.84rem; }
   footer a{ color: var(--muted); text-decoration: underline; }
   footer .files{ font-family:"IBM Plex Mono",monospace; font-size:.8rem; margin-top:10px; }
-  .bars,
-  .group-chart,
-  .stack-row,
-  .stack {
-    min-width: 0;
+  #cswap-results {
+      margin-left: 0;
+      margin-right: 0;
+      padding-left: 20px;
+      padding-right: 20px;
   }
 
-  .bar-row {
-    min-width: 0;
-  }
-
-  .bar-row .track {
-    min-width: 0;
-    position: relative;
-  }
-
-  .bar-row .fill,
-  .mini-bar .fill {
-    display: block;
-    flex-shrink: 0;
-  }
-
-  .group,
-  .fig-card {
-    min-width: 0;
+  #cswap-results > .inner {
+      width: 100%;
+      max-width: 860px;
+      margin-left: auto;
+      margin-right: auto;
   }
 </style>
 
