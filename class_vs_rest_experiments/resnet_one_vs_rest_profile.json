@@ -1,0 +1,477 @@
+{
+  "config": {
+    "N_CAL": 128,
+    "TARGET_CLASS": 0,
+    "N_PAIRS": 800,
+    "ALPHA": 0.05,
+    "TAU_REL": 0.02,
+    "FDR_METHOD": "fdr_by",
+    "PROB_FLOOR": 0.001,
+    "scoring": "роль - эпсилон C-SWAP (без голосования); S-тест - сырой логит истинного класса (ATE)"
+  },
+  "rows": [
+    {
+      "net_type": "обученная",
+      "layer": "layer1.0.conv2",
+      "class_idx": 0,
+      "n_channels": 64,
+      "n_images_kept": 49,
+      "n_critical": 0,
+      "n_harmful": 0,
+      "n_neutral": 64,
+      "n_pairs_tested": 800,
+      "total_possible_pairs": 2016,
+      "coverage_pct": 39.682539682539684,
+      "n_syn": 0,
+      "n_sub": 1,
+      "nonadditive_pairs": [
+        [
+          42,
+          54,
+          -0.2993
+        ]
+      ],
+      "seconds": 1289.7251363999676
+    },
+    {
+      "net_type": "обученная",
+      "layer": "layer1.1.conv2",
+      "class_idx": 0,
+      "n_channels": 64,
+      "n_images_kept": 49,
+      "n_critical": 0,
+      "n_harmful": 0,
+      "n_neutral": 64,
+      "n_pairs_tested": 800,
+      "total_possible_pairs": 2016,
+      "coverage_pct": 39.682539682539684,
+      "n_syn": 0,
+      "n_sub": 6,
+      "nonadditive_pairs": [
+        [
+          11,
+          16,
+          -0.33963
+        ],
+        [
+          47,
+          55,
+          -0.44541
+        ],
+        [
+          29,
+          50,
+          -0.13603
+        ],
+        [
+          16,
+          47,
+          -0.42794
+        ],
+        [
+          11,
+          36,
+          -0.14366
+        ],
+        [
+          10,
+          51,
+          -0.14076
+        ]
+      ],
+      "seconds": 1072.3905365999672
+    },
+    {
+      "net_type": "обученная",
+      "layer": "layer2.0.conv2",
+      "class_idx": 0,
+      "n_channels": 128,
+      "n_images_kept": 49,
+      "n_critical": 0,
+      "n_harmful": 0,
+      "n_neutral": 128,
+      "n_pairs_tested": 800,
+      "total_possible_pairs": 8128,
+      "coverage_pct": 9.84251968503937,
+      "n_syn": 8,
+      "n_sub": 13,
+      "nonadditive_pairs": [
+        [
+          7,
+          48,
+          0.18997
+        ],
+        [
+          45,
+          54,
+          -0.20237
+        ],
+        [
+          60,
+          76,
+          -0.15878
+        ],
+        [
+          4,
+          100,
+          0.13173
+        ],
+        [
+          86,
+          116,
+          -0.24429
+        ],
+        [
+          47,
+          75,
+          0.12584
+        ],
+        [
+          116,
+          119,
+          0.14194
+        ],
+        [
+          10,
+          49,
+          -0.13612
+        ],
+        [
+          57,
+          88,
+          0.12914
+        ],
+        [
+          35,
+          49,
+          -0.15568
+        ],
+        [
+          7,
+          86,
+          -0.1275
+        ],
+        [
+          36,
+          46,
+          -0.20129
+        ],
+        [
+          45,
+          60,
+          -0.13826
+        ],
+        [
+          18,
+          117,
+          0.14363
+        ],
+        [
+          20,
+          45,
+          -0.16503
+        ],
+        [
+          2,
+          94,
+          -0.14069
+        ],
+        [
+          48,
+          127,
+          0.15729
+        ],
+        [
+          80,
+          104,
+          -0.12173
+        ],
+        [
+          9,
+          46,
+          -0.15098
+        ],
+        [
+          100,
+          117,
+          -0.1448
+        ],
+        [
+          6,
+          113,
+          0.13366
+        ]
+      ],
+      "seconds": 704.4564796999912
+    },
+    {
+      "net_type": "обученная",
+      "layer": "layer2.1.conv2",
+      "class_idx": 0,
+      "n_channels": 128,
+      "n_images_kept": 49,
+      "n_critical": 0,
+      "n_harmful": 0,
+      "n_neutral": 128,
+      "n_pairs_tested": 800,
+      "total_possible_pairs": 8128,
+      "coverage_pct": 9.84251968503937,
+      "n_syn": 0,
+      "n_sub": 0,
+      "nonadditive_pairs": [],
+      "seconds": 548.0942297000438
+    },
+    {
+      "net_type": "обученная",
+      "layer": "layer3.0.conv2",
+      "class_idx": 0,
+      "n_channels": 256,
+      "n_images_kept": 49,
+      "n_critical": 0,
+      "n_harmful": 0,
+      "n_neutral": 256,
+      "n_pairs_tested": 800,
+      "total_possible_pairs": 32640,
+      "coverage_pct": 2.450980392156863,
+      "n_syn": 0,
+      "n_sub": 1,
+      "nonadditive_pairs": [
+        [
+          94,
+          137,
+          -0.12846
+        ]
+      ],
+      "seconds": 433.892844899965
+    },
+    {
+      "net_type": "обученная",
+      "layer": "layer3.1.conv2",
+      "class_idx": 0,
+      "n_channels": 256,
+      "n_images_kept": 49,
+      "n_critical": 0,
+      "n_harmful": 0,
+      "n_neutral": 256,
+      "n_pairs_tested": 800,
+      "total_possible_pairs": 32640,
+      "coverage_pct": 2.450980392156863,
+      "n_syn": 0,
+      "n_sub": 0,
+      "nonadditive_pairs": [],
+      "seconds": 320.80564909998793
+    },
+    {
+      "net_type": "обученная",
+      "layer": "layer4.0.conv2",
+      "class_idx": 0,
+      "n_channels": 512,
+      "n_images_kept": 49,
+      "n_critical": 0,
+      "n_harmful": 0,
+      "n_neutral": 512,
+      "n_pairs_tested": 800,
+      "total_possible_pairs": 130816,
+      "coverage_pct": 0.6115459882583171,
+      "n_syn": 0,
+      "n_sub": 0,
+      "nonadditive_pairs": [],
+      "seconds": 203.68244360003155
+    },
+    {
+      "net_type": "обученная",
+      "layer": "layer4.1.conv2",
+      "class_idx": 0,
+      "n_channels": 512,
+      "n_images_kept": 49,
+      "n_critical": 0,
+      "n_harmful": 0,
+      "n_neutral": 512,
+      "n_pairs_tested": 800,
+      "total_possible_pairs": 130816,
+      "coverage_pct": 0.6115459882583171,
+      "n_syn": 0,
+      "n_sub": 0,
+      "nonadditive_pairs": [],
+      "seconds": 71.61531239998294
+    },
+    {
+      "net_type": "необученная",
+      "layer": "layer1.0.conv2",
+      "class_idx": 0,
+      "n_channels": 64,
+      "n_images_kept": 46,
+      "n_critical": 2,
+      "n_harmful": 3,
+      "n_neutral": 59,
+      "n_pairs_tested": 800,
+      "total_possible_pairs": 2016,
+      "coverage_pct": 39.682539682539684,
+      "n_syn": 0,
+      "n_sub": 0,
+      "nonadditive_pairs": [],
+      "seconds": 1297.1590535999858
+    },
+    {
+      "net_type": "необученная",
+      "layer": "layer1.1.conv2",
+      "class_idx": 0,
+      "n_channels": 64,
+      "n_images_kept": 46,
+      "n_critical": 5,
+      "n_harmful": 3,
+      "n_neutral": 56,
+      "n_pairs_tested": 800,
+      "total_possible_pairs": 2016,
+      "coverage_pct": 39.682539682539684,
+      "n_syn": 0,
+      "n_sub": 0,
+      "nonadditive_pairs": [],
+      "seconds": 1126.107813199982
+    },
+    {
+      "net_type": "необученная",
+      "layer": "layer2.0.conv2",
+      "class_idx": 0,
+      "n_channels": 128,
+      "n_images_kept": 46,
+      "n_critical": 16,
+      "n_harmful": 24,
+      "n_neutral": 88,
+      "n_pairs_tested": 800,
+      "total_possible_pairs": 8128,
+      "coverage_pct": 9.84251968503937,
+      "n_syn": 0,
+      "n_sub": 0,
+      "nonadditive_pairs": [],
+      "seconds": 726.8579790000222
+    },
+    {
+      "net_type": "необученная",
+      "layer": "layer2.1.conv2",
+      "class_idx": 0,
+      "n_channels": 128,
+      "n_images_kept": 46,
+      "n_critical": 22,
+      "n_harmful": 31,
+      "n_neutral": 75,
+      "n_pairs_tested": 800,
+      "total_possible_pairs": 8128,
+      "coverage_pct": 9.84251968503937,
+      "n_syn": 0,
+      "n_sub": 0,
+      "nonadditive_pairs": [],
+      "seconds": 567.4033296999987
+    },
+    {
+      "net_type": "необученная",
+      "layer": "layer3.0.conv2",
+      "class_idx": 0,
+      "n_channels": 256,
+      "n_images_kept": 46,
+      "n_critical": 76,
+      "n_harmful": 73,
+      "n_neutral": 107,
+      "n_pairs_tested": 800,
+      "total_possible_pairs": 32640,
+      "coverage_pct": 2.450980392156863,
+      "n_syn": 2,
+      "n_sub": 0,
+      "nonadditive_pairs": [
+        [
+          76,
+          173,
+          0.00117
+        ],
+        [
+          135,
+          144,
+          0.00118
+        ]
+      ],
+      "seconds": 453.3219216000289
+    },
+    {
+      "net_type": "необученная",
+      "layer": "layer3.1.conv2",
+      "class_idx": 0,
+      "n_channels": 256,
+      "n_images_kept": 46,
+      "n_critical": 94,
+      "n_harmful": 97,
+      "n_neutral": 65,
+      "n_pairs_tested": 800,
+      "total_possible_pairs": 32640,
+      "coverage_pct": 2.450980392156863,
+      "n_syn": 6,
+      "n_sub": 0,
+      "nonadditive_pairs": [
+        [
+          15,
+          206,
+          0.00096
+        ],
+        [
+          11,
+          61,
+          0.00067
+        ],
+        [
+          23,
+          63,
+          0.00084
+        ],
+        [
+          20,
+          115,
+          0.00095
+        ],
+        [
+          204,
+          225,
+          0.00087
+        ],
+        [
+          91,
+          110,
+          0.00085
+        ]
+      ],
+      "seconds": 301.60652779997326
+    },
+    {
+      "net_type": "необученная",
+      "layer": "layer4.0.conv2",
+      "class_idx": 0,
+      "n_channels": 512,
+      "n_images_kept": 46,
+      "n_critical": 217,
+      "n_harmful": 213,
+      "n_neutral": 82,
+      "n_pairs_tested": 800,
+      "total_possible_pairs": 130816,
+      "coverage_pct": 0.6115459882583171,
+      "n_syn": 0,
+      "n_sub": 0,
+      "nonadditive_pairs": [],
+      "seconds": 187.75272689998383
+    },
+    {
+      "net_type": "необученная",
+      "layer": "layer4.1.conv2",
+      "class_idx": 0,
+      "n_channels": 512,
+      "n_images_kept": 46,
+      "n_critical": 218,
+      "n_harmful": 242,
+      "n_neutral": 52,
+      "n_pairs_tested": 800,
+      "total_possible_pairs": 130816,
+      "coverage_pct": 0.6115459882583171,
+      "n_syn": 0,
+      "n_sub": 0,
+      "nonadditive_pairs": [],
+      "seconds": 62.88686859997688
+    }
+  ]
+}
