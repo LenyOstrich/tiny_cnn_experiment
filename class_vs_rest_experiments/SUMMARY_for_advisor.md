@@ -1,6 +1,6 @@
 # Один класс против остальных: связи между каналами ResNet-18
 
-Код: [resnet_one_vs_rest_profile.py](resnet_one_vs_rest_profile.py) (самодостаточный, без внешних зависимостей проекта). Подробный журнал с историей методологии — [FINDINGS.md](FINDINGS.md).
+Код: [resnet_one_vs_rest_profile.py](resnet_one_vs_rest_profile.py). Подробный журнал с историей методологии — [FINDINGS.md](FINDINGS.md).
 
 ## Вопрос
 
