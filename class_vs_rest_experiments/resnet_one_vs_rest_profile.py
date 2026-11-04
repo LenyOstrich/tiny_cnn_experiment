@@ -27,9 +27,9 @@ residual), а не нелинейности способа измерения.
    C-SWAP-разметки, где роль - голосование (OR) значимости по всем классам.
 
 2. ПРИЧИННЫЙ S-ТЕСТ (синергия/субаддитивность) - сырой логит истинного класса,
-   TE = baseline_logit - ablated_logit, S(A,B) = TE(A)+TE(B)-TE(A,B). Никакого
-   margin и никакой вероятности здесь нет.
-
+   TE = baseline_logit - ablated_logit, S(A,B) = TE(A,B)-TE(A)-TE(B) (S>0 -
+   синергия: совместная абляция вредит сильнее суммы одиночных; S<0 -
+   субаддитивность).
 Абляция - do(zero channel): вся карта признаков канала в точке "a" (вход в
 conv2 блока, через forward-pre-hook) зануляется, логиты пересчитываются с этой
 точки до конца сети. 8 точек по глубине (оба блока каждой из 4 стадий ResNet-18),
@@ -37,10 +37,12 @@ conv2 блока, через forward-pre-hook) зануляется, логит�
 tau, обученная (ImageNet-веса) vs необученная (случайная инициализация +
 калибровка BatchNorm) сеть.
 """
+import argparse
 import itertools
 import json
 import os
 import time
+from pathlib import Path
 
 import numpy as np
 import torch
@@ -48,9 +50,33 @@ from scipy import stats
 from statsmodels.stats.multitest import multipletests
 from torchvision import datasets, models, transforms
 
-# --- конфигурация: поменяйте под свою машину ---
-DATA_ROOT = r"D:\cnn_mi_experiments\ate_analysis\data\imagenet_paper\val"   # папка-на-класс с картинками
-OUT_DIR = r"D:\cnn_mi_experiments\class_vs_rest_experiments"
+# --- конфигурация: пути задаются флагами командной строки (--data-root обязателен,
+# его нет смысла угадывать на чужой машине; --out-dir по умолчанию - папка скрипта).
+# Числовые параметры эксперимента (N_CAL/TARGET_CLASS/N_PAIRS ниже) по-прежнему через
+# переменные окружения - трогать их не просили, оставлено как было.
+#
+# --data-root должен указывать на папку в формате torchvision.datasets.ImageFolder:
+#   data_root/
+#     0/   (или любое другое имя класса)  - изображения этого класса
+#     1/
+#     ...
+# Класс с индексом TARGET_CLASS (см. ниже, по умолчанию 0 - это 0-й класс ПО АЛФАВИТНОМУ
+# ПОРЯДКУ ИМЁН ПОДПАПОК внутри ImageFolder, не обязательно "класс с именем 0") должен
+# содержать не меньше N_CAL изображений. В эксперименте использовалась локальная
+# подвыборка ImageNet val (по папке на класс) - она не поставляется с этим скриптом,
+# нужно подставить свою: `python resnet_one_vs_rest_profile.py --data-root D:\путь\к\папке`.
+_arg_parser = argparse.ArgumentParser(
+    # Короткое описание, не весь __doc__ модуля - он содержит не-ASCII символы (напр. xi),
+    # на которых argparse падает при печати --help в консоли с codepage типа cp1251.
+    description="Причинный тест синергии/субаддитивности между каналами ResNet-18 "
+                 "на одном классе (direction 1 плана недели). Подробности - в докстринге файла.")
+_arg_parser.add_argument("--data-root", required=True, dest="data_root",
+                          help="папка с изображениями в формате ImageFolder (подпапка на класс)")
+_arg_parser.add_argument("--out-dir", default=str(Path(__file__).resolve().parent), dest="out_dir",
+                          help="куда писать JSON с результатом (по умолчанию - папка этого скрипта)")
+_args = _arg_parser.parse_args()
+OUT_DIR = _args.out_dir
+DATA_ROOT = _args.data_root
 
 SEED = 42
 ALPHA = 0.05
@@ -270,7 +296,7 @@ def analyze_layer_one_class(model, dataset, stage_idx, block_idx, n_channels, cl
         logit_pairs = logits_full_pairs[:, :, class_idx]
         for k, (i, j) in enumerate(pairs):
             te_joint = baseline_logit[None, :] - logit_pairs[k:k + 1]
-            s_vals = te_cache[i] + te_cache[j] - te_joint[0]
+            s_vals = te_joint[0] - te_cache[i] - te_cache[j]
             r = mean_test(s_vals, tau_logit)
             r.update(a=i, b=j, S=r["ate"])
             rows.append(r)
